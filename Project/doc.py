@@ -34,15 +34,21 @@ else:
 #----------------------------------------------------------------
 
 
-image_file = "prueba2.jpg"
-image_route = os.path.join(os.getcwd(), image_file)
+import glob
 
-if not os.path.exists(image_route):
-    raise FileNotFoundError(f"Image was not found in: {image_route}")
+# Search for all .jpg files in current directory
+images = glob.glob(os.path.join(os.getcwd(), "*.jpg"))
+
+if not images:
+    raise FileNotFoundError("Images with extention .jpg not found in the directory.")
+
+# Use the first image found
+image_route = images[0]
+print(f"📷 Using image: {os.path.basename(image_route)}")
 
 img = cv2.imread(image_route)
 if img is None:
-    raise ValueError("Image could not be loaded..")
+    raise ValueError("Image could not be loaded.")
 
 
 #----------------------------------------------------------------
@@ -60,6 +66,7 @@ def apply_ocr(image):
     return (ocr_result)
 
 gray_image = gray_scale(img)
+# cv2.imwrite("temp/1. inverted.jpg", gray_image)
 text_detected = apply_ocr(gray_image)
 # print(text_detected) # Check complete text detected
 
@@ -86,11 +93,17 @@ else:
 lines = text_detected.splitlines()
 
 # List for key words that indicates the header
-header_key_words = ["Lin", "nea", "Serv", "vicio", "Ent", "rega"]
+first_header_key_words = ["CeCo", "Centro", "Pos", "Material", "Denominacion", "Fecha de", "Valor Unitario"]
+second_header_key_words = ["Lin", "nea", "Serv", "vicio", "Ent", "rega"]
 
 # Search the first line that containes any of the key words
+start_index = -1
 for i, line in enumerate(lines):
-    if any(word in line for word in header_key_words):
+    if any(word in line for word in first_header_key_words):
+        start_index = i+1
+        break
+for i, line in enumerate(lines):
+    if any(word in line for word in second_header_key_words):
         start_index = i
         break
 
@@ -139,18 +152,24 @@ def clean_line(line):
     return line
 
 
+#----------------------------------------------------------------
+#---------- EXTRACT THE DATA (REGEX) ----------
+#----------------------------------------------------------------
+
+
 def extract_data(line):
     line = clean_line(line)
 
-    # Buscar los campos con expresiones regulares
+    # Search the fields using regular expressions
     pattern = re.compile(
-        r'(?P<center>\d+)\s+'                      # CeCo
-        # r'(?P<line>\d{1,3}/\d)\s+'                  # Pos / Line
+        r'(?P<center>\d+)\s+'                       # CeCo
+        # r'(?P<line>\d{1,3}/\d)\s+'                # Pos / Line
         r'(?P<line>.*?)\s+'
-        r'(?P<material>\d{5,})\s+'                   # Material / Service
-        r'(?P<deno>.*?)\s+'                  # Deno (free text before solped)
-        r'(?P<solped>\d{6,10})\s+'                   # Solped
-        r'(?P<date>\d{2}.\d{2}.\d{4})\s+'           # Delivery date
+        r'(?P<material>\d{5,})\s+'                  # Material / Service
+        r'(?P<deno>.*?)\s+'                         # Deno (free text before solped)
+        r'(?P<solped>\d{6,10})\s+'                  # Solped
+        # r'(?P<date>\d{2}.\d{2}.\d{4})\s+'          # Delivery date
+        r'(?P<date>\d{2}\.\d{2}\.\d{1,4})\.?\s+'
         r'(?P<UN>.*?)\s+'
         r'(?P<quantity>.*?)\s+'
         r'(?P<unit_value>.*?)\s+'
@@ -176,9 +195,42 @@ for line in lines[start_index+1:]:
     else:
         print("Could not be parsed:", line, "\n")
 
-for line in matched_lines:
-    required_fields = ['center', 'material', 'solped', 'subtotal']
+
+#----------------------------------------------------------------
+#---------- PREPARE THE DATA ----------
+#----------------------------------------------------------------
+
+
+from collections import Counter
+
+center_mode = Counter(line['center'] for line in matched_lines).most_common(1)[0][0]
+
+print("\n\n\n\n")
+
+places = {
+    '2282': 'C',
+    '2288':	'T',
+    '2260':	'CH'
+}
+
+for i, line in enumerate(matched_lines):
+    required_fields = ['pedido', 'posicion', 'solped', 'material', 'cantidad', 'subtotal', 'centro', 'denom']
     required_data = ""
     for field in required_fields:
-        required_data += f'{field}: {line[field]} '
-    print(required_data)
+        new_field = ""
+        if field == 'pedido':
+            new_field = order_number
+        elif field == 'posicion':
+            new_field = (i+1)*10
+        elif field == 'cantidad':
+            new_field = 2
+        elif field == 'centro':
+            new_field = center_mode
+        elif field == 'denom':
+            new_field = places[center_mode] if center_mode in places else ""
+        else:
+            new_field = f'{line[field].replace('.','')} '
+        
+        required_data += f'{new_field} '
+    normalized_data = ' '.join(required_data.split())
+    print(normalized_data)
