@@ -1,73 +1,27 @@
 import cv2
-import shutil
-import pytesseract
-import os
-
-
-#----------------------------------------------------------------
-#---------- SET UP TESSERACT ----------
-#----------------------------------------------------------------
-
-
-# Try to use tesseract (from PATH)
-tesseract_en_path = shutil.which("tesseract")
-
-if tesseract_en_path:
-    # It is in PATH
-    print(f"✅ Using Tesseract from PATH: {tesseract_en_path}")
-    pytesseract.pytesseract.tesseract_cmd = tesseract_en_path
-else:
-    # Search it locally in the project
-    local_route = os.path.join(os.getcwd(), "tesseract", "tesseract.exe")
-    if os.path.exists(local_route):
-        print(f"✅ Using Tesseract from local route: {local_route}")
-        pytesseract.pytesseract.tesseract_cmd = local_route
-    else:
-        raise FileNotFoundError(
-            "❌ Tesseract not found.\n"
-            "Be sure it is installed and in PATH, or put tesseract.exe in './tesseract/'"
-        )
 
 
 #----------------------------------------------------------------
 #---------- SET UP THE IMAGE ----------
 #----------------------------------------------------------------
 
+from modules import set_up_images
 
-import glob
-
-# Search for all .jpg files in current directory
-images = glob.glob(os.path.join(os.getcwd(), "*.jpg"))
-
-if not images:
-    raise FileNotFoundError("Images with extention .jpg not found in the directory.")
+images = set_up_images.getImages()
 
 # Use the first image found
 image_route = images[0]
-print(f"📷 Using image: {os.path.basename(image_route)}")
-
 img = cv2.imread(image_route)
 if img is None:
     raise ValueError("Image could not be loaded.")
 
-
 #----------------------------------------------------------------
-#---------- PREPROCESSING ----------
+#---------- EXECUTE OCR ----------
 #----------------------------------------------------------------
 
+from modules import image_ocr
 
-def gray_scale(image):
-    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-custom_config = r'--oem 3 --psm 6' # Tesseract use Spanish
-
-def apply_ocr(image):
-    ocr_result = pytesseract.image_to_string(image, config=custom_config)
-    return (ocr_result)
-
-gray_image = gray_scale(img)
-# cv2.imwrite("temp/1. inverted.jpg", gray_image)
-text_detected = apply_ocr(gray_image)
+text_detected = image_ocr.apply_ocr(img)
 # print(text_detected) # Check complete text detected
 
 
