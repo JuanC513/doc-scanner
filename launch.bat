@@ -10,9 +10,9 @@ REM Activar entorno virtual
 call env\Scripts\activate
 
 REM Instalar requerimientos si existen
-IF EXIST "requirements.txt" (
+IF EXIST ".\Project\requirements.txt" (
     echo Instalando dependencias...
-    pip install -r requirements.txt
+    pip install -r .\Project\requirements.txt
 )
 
 echo === Entorno listo.
