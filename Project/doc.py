@@ -44,25 +44,7 @@ print("\n"*4)
 
 import re
 
-# Clean the line so it is easier to extract the data
-def clean_line(line):
-    # 1. Remove common specific chars due to OCR noise
-    line = re.sub(r'[«=+~—_]', '', line)
-
-    # 2. Remove any non alphanumeric char except some specific
-    line = re.sub(r'[^\w\s.,/]', '', line)
-
-    # 3. Remove dots alone between spaces " . " → " "
-    line = re.sub(r'\s\.\s', ' ', line)
-
-    # 4. Remove dots at the beggining or the end of the line
-    line = re.sub(r'^\.\s*|\s*\.$', '', line.strip())
-
-    # 5. Replace multiple spaces for just one
-    line = re.sub(r'\s+', ' ', line)
-    print(f'Linea limpiada: {line}')
-    return line
-
+data_cleaned = text_regex.clean_lines(data_rows)
 
 #----------------------------------------------------------------
 #---------- EXTRACT THE DATA (REGEX) ----------
@@ -70,7 +52,7 @@ def clean_line(line):
 
 
 def extract_data(line):
-    line = clean_line(line)
+    # line = clean_line(line)
 
     # Search the fields using regular expressions
     pattern = re.compile(
@@ -97,7 +79,7 @@ def extract_data(line):
         return None
 
 matched_lines = []
-for line in data_rows:
+for line in data_cleaned:
     if line.strip() == "":
         continue
     data = extract_data(line)

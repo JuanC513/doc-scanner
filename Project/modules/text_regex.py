@@ -44,3 +44,27 @@ def search_data_rows(text):
     for row in data_rows:
         print(row) if row.strip() != "" else None
     return data_rows
+
+
+def clean_lines(lines):
+    
+    # Clean the line so it is easier to extract the data
+    def clean_line(line):
+        # 1. Remove common specific chars due to OCR noise
+        line = re.sub(r'[«=+~—_]', '', line)
+
+        # 2. Remove any non alphanumeric char except some specific
+        line = re.sub(r'[^\w\s.,/]', '', line)
+
+        # 3. Remove dots alone between spaces " . " → " "
+        line = re.sub(r'\s\.\s', ' ', line)
+
+        # 4. Remove dots at the beggining or the end of the line
+        line = re.sub(r'^\.\s*|\s*\.$', '', line.strip())
+
+        # 5. Replace multiple spaces for just one
+        line = re.sub(r'\s+', ' ', line)
+        print(f'Linea limpiada: {line}')
+        return line
+    
+    return map(lambda l: clean_line(l), lines)
