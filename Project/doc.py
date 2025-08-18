@@ -42,53 +42,13 @@ print("\n"*4)
 #---------- CLEAN THE DATA FOUND (REGEX) ----------
 #----------------------------------------------------------------
 
-import re
-
 data_cleaned = text_regex.clean_lines(data_rows)
 
 #----------------------------------------------------------------
 #---------- EXTRACT THE DATA (REGEX) ----------
 #----------------------------------------------------------------
 
-
-def extract_data(line):
-    # line = clean_line(line)
-
-    # Search the fields using regular expressions
-    pattern = re.compile(
-        r'(?P<center>\d+)\s+'                       # CeCo
-        # r'(?P<line>\d{1,3}/\d)\s+'                # Pos / Line
-        r'(?P<line>.*?)\s+'
-        r'(?P<material>\d{5,})\s+'                  # Material / Service
-        r'(?P<deno>.*?)\s+'                         # Deno (free text before solped)
-        r'(?P<solped>\d{6,10})\s+'                  # Solped
-        # r'(?P<date>\d{2}.\d{2}.\d{4})\s+'          # Delivery date
-        r'(?P<date>\d{2}\.\d{2}\.\d{1,4})\.?\s+'
-        r'(?P<UN>.*?)\s+'
-        r'(?P<quantity>.*?)\s+'
-        r'(?P<unit_value>.*?)\s+'
-        r'(?P<vat>\d+[.,]?\d*)\s+'
-        r'(?P<subtotal>\d+[.,]?\d*)'
-    )
-
-    match = pattern.search(line)
-    if match:
-        return match.groupdict()
-    else:
-        print("NOT MATCHED: ", line)
-        return None
-
-matched_lines = []
-for line in data_cleaned:
-    if line.strip() == "":
-        continue
-    data = extract_data(line)
-    if data:
-        matched_lines.append(data)
-        print(data)
-    else:
-        print("Could not be parsed:", line, "\n")
-
+data_matched = text_regex.match_data(data_cleaned)
 
 #----------------------------------------------------------------
 #---------- PREPARE THE DATA ----------
@@ -97,7 +57,7 @@ for line in data_cleaned:
 
 from collections import Counter
 
-center_mode = Counter(line['center'] for line in matched_lines).most_common(1)[0][0]
+center_mode = Counter(line['center'] for line in data_matched).most_common(1)[0][0]
 
 print("\n\n\n\n")
 
@@ -118,7 +78,7 @@ places = {
     '2260':	PLACE_2260_KEY
 }
 
-for i, line in enumerate(matched_lines):
+for i, line in enumerate(data_matched):
     required_fields = ['pedido', 'posicion', 'solped', 'material', 'cantidad', 'subtotal', 'centro', 'denom']
     required_data = ""
     for field in required_fields:

@@ -47,7 +47,7 @@ def search_data_rows(text):
 
 
 def clean_lines(lines):
-    
+
     # Clean the line so it is easier to extract the data
     def clean_line(line):
         # 1. Remove common specific chars due to OCR noise
@@ -68,3 +68,45 @@ def clean_lines(lines):
         return line
     
     return map(lambda l: clean_line(l), lines)
+
+
+# Match all data rows
+def match_data(lines):
+
+    def extract_data(line):
+        # Search the fields using regular expressions
+        pattern = re.compile(
+            r'(?P<center>\d+)\s+'                       # CeCo
+            # r'(?P<line>\d{1,3}/\d)\s+'                # Pos / Line
+            r'(?P<line>.*?)\s+'
+            r'(?P<material>\d{5,})\s+'                  # Material / Service
+            r'(?P<deno>.*?)\s+'                         # Deno (free text before solped)
+            r'(?P<solped>\d{6,10})\s+'                  # Solped
+            # r'(?P<date>\d{2}.\d{2}.\d{4})\s+'          # Delivery date
+            r'(?P<date>\d{2}\.\d{2}\.\d{1,4})\.?\s+'
+            r'(?P<UN>.*?)\s+'
+            r'(?P<quantity>.*?)\s+'
+            r'(?P<unit_value>.*?)\s+'
+            r'(?P<vat>\d+[.,]?\d*)\s+'
+            r'(?P<subtotal>\d+[.,]?\d*)'
+        )
+        match = pattern.search(line)
+        if match:
+            return match.groupdict()
+        else:
+            print("NOT MATCHED: ", line)
+            return None
+
+    matched_lines = []
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
+        data = extract_data(line)
+        if data:
+            matched_lines.append(data)
+            print(data)
+        else:
+            print("Could not be parsed:", line, "\n")
+    return matched_lines
