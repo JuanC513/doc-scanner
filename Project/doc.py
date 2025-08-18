@@ -24,67 +24,25 @@ from modules import image_ocr
 text_detected = image_ocr.apply_ocr(img)
 # print(text_detected) # Check complete text detected
 
-
 #----------------------------------------------------------------
 #---------- SEARCH FOR THE REQUIRED DATA (REGEX) ----------
 #----------------------------------------------------------------
 
+from modules import text_regex
 
-import re
+# Search order number
+order_number = text_regex.search_order_number(text_detected)
 
-# Search order number by pattern
+# Search the data rows
+data_rows = text_regex.search_data_rows(text_detected)
 
-order_pattern = re.search(r'No[:\s]*([0-9]{7,})', text_detected)
-
-if order_pattern:
-    order_number = order_pattern.group(1)
-    print(f"\n✅ Order number detected: {order_number}")
-else:
-    print("\n⚠️ Order number was not detected.")
-
-# Search the header
-
-lines = text_detected.splitlines()
-
-# List for key words that indicates the header
-first_header_key_words = ["CeCo", "Centro", "Pos", "Material", "Denominacion", "Fecha de", "Valor Unitario"]
-second_header_key_words = ["Lin", "nea", "Serv", "vicio", "Ent", "rega"]
-
-# Search the first line that containes any of the key words
-start_index = -1
-for i, line in enumerate(lines):
-    if any(word in line for word in first_header_key_words):
-        start_index = i+1
-        break
-for i, line in enumerate(lines):
-    if any(word in line for word in second_header_key_words):
-        start_index = i
-        break
-
-if start_index == -1:
-    raise LookupError(
-        "❌ Header line was not found.\n"
-    )
-else:
-    print(f"Header detected in line {start_index}:")
-    print(lines[start_index])
-    print("\nData rows detected:")
-    num_rows = 0
-    for row in lines[start_index+1:]:
-        if row.strip() == "":
-            continue  # skip empty lines
-        print(row)
-        num_rows += 1
-    
-    print("Rows detected: ", num_rows)
-
-print("\n\n\n\n\n")
-
+print("\n"*4)
 
 #----------------------------------------------------------------
 #---------- CLEAN THE DATA FOUND (REGEX) ----------
 #----------------------------------------------------------------
 
+import re
 
 # Clean the line so it is easier to extract the data
 def clean_line(line):
@@ -139,7 +97,7 @@ def extract_data(line):
         return None
 
 matched_lines = []
-for line in lines[start_index+1:]:
+for line in data_rows:
     if line.strip() == "":
         continue
     data = extract_data(line)
