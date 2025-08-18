@@ -167,6 +167,7 @@ from dotenv import load_dotenv
 # Load env variables from .env
 load_dotenv()
 
+# Get data from .env file
 PLACE_2282_KEY = os.getenv("PLACE_2282_KEY")
 PLACE_2288_KEY = os.getenv("PLACE_2288_KEY")
 PLACE_2260_KEY = os.getenv("PLACE_2260_KEY")
