@@ -1,6 +1,0 @@
-opencv-python
-pytesseract
-gspread
-oauth2client
-pillow
-matplotlib
