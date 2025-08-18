@@ -161,10 +161,20 @@ center_mode = Counter(line['center'] for line in matched_lines).most_common(1)[0
 
 print("\n\n\n\n")
 
+import os
+from dotenv import load_dotenv
+
+# Load env variables from .env
+load_dotenv()
+
+PLACE_2282_KEY = os.getenv("PLACE_2282_KEY")
+PLACE_2288_KEY = os.getenv("PLACE_2288_KEY")
+PLACE_2260_KEY = os.getenv("PLACE_2260_KEY")
+
 places = {
-    '2282': 'C',
-    '2288':	'T',
-    '2260':	'CH'
+    '2282': PLACE_2282_KEY,
+    '2288':	PLACE_2288_KEY,
+    '2260':	PLACE_2260_KEY
 }
 
 for i, line in enumerate(matched_lines):
