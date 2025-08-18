@@ -67,7 +67,13 @@ def clean_lines(lines):
         print(f'Linea limpiada: {line}')
         return line
     
-    return map(lambda l: clean_line(l), lines)
+    cleaned_lines = []
+    for l in lines:
+        line_cleaned = clean_line(l)
+        if line_cleaned.strip() != "":
+            cleaned_lines.append(line_cleaned)
+    
+    return cleaned_lines
 
 
 # Match all data rows
@@ -99,10 +105,6 @@ def match_data(lines):
 
     matched_lines = []
     for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-
         data = extract_data(line)
         if data:
             matched_lines.append(data)
