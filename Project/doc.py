@@ -54,29 +54,12 @@ data_matched = text_regex.match_data(data_cleaned)
 #---------- PREPARE THE DATA ----------
 #----------------------------------------------------------------
 
+from modules import centers_info
 
-from collections import Counter
-
-center_mode = Counter(line['center'] for line in data_matched).most_common(1)[0][0]
+center_mode = centers_info.get_center_mode(data_matched)
+places = centers_info.get_places()
 
 print("\n\n\n\n")
-
-import os
-from dotenv import load_dotenv
-
-# Load env variables from .env
-load_dotenv()
-
-# Get data from .env file
-PLACE_2282_KEY = os.getenv("PLACE_2282_KEY")
-PLACE_2288_KEY = os.getenv("PLACE_2288_KEY")
-PLACE_2260_KEY = os.getenv("PLACE_2260_KEY")
-
-places = {
-    '2282': PLACE_2282_KEY,
-    '2288':	PLACE_2288_KEY,
-    '2260':	PLACE_2260_KEY
-}
 
 for i, line in enumerate(data_matched):
     required_fields = ['pedido', 'posicion', 'solped', 'material', 'cantidad', 'subtotal', 'centro', 'denom']
@@ -99,3 +82,5 @@ for i, line in enumerate(data_matched):
         required_data += f'{new_field} '
     normalized_data = ' '.join(required_data.split())
     print(normalized_data)
+
+print(f'Usando imagen: {image_route}')
