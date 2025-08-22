@@ -1,9 +1,11 @@
 env
 .env
 __pycache__/
+temp
 
 *.jpg
 *.png
 
 tesseract
 doc tuto.py
+correct_ocrs.py
