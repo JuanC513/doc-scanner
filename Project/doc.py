@@ -1,10 +1,8 @@
-import cv2
-
-
 #----------------------------------------------------------------
 #---------- SET UP THE IMAGE ----------
 #----------------------------------------------------------------
 
+import cv2
 from modules import set_up_images
 
 images = set_up_images.getImages()
@@ -50,8 +48,10 @@ data_cleaned = text_regex.clean_lines(data_rows)
 
 data_matched = text_regex.match_data(data_cleaned)
 
+print("\n"*3)
+
 #----------------------------------------------------------------
-#---------- PREPARE THE DATA ----------
+#---------- GET CENTERS INFO ----------
 #----------------------------------------------------------------
 
 from modules import centers_info
@@ -59,28 +59,25 @@ from modules import centers_info
 center_mode = centers_info.get_center_mode(data_matched)
 places = centers_info.get_places()
 
-print("\n\n\n\n")
+#----------------------------------------------------------------
+#---------- PREPARE THE DATA ----------
+#----------------------------------------------------------------
 
-for i, line in enumerate(data_matched):
-    required_fields = ['pedido', 'posicion', 'solped', 'material', 'cantidad', 'subtotal', 'centro', 'denom']
-    required_data = ""
-    for field in required_fields:
-        new_field = ""
-        if field == 'pedido':
-            new_field = order_number
-        elif field == 'posicion':
-            new_field = (i+1)*10
-        elif field == 'cantidad':
-            new_field = 2
-        elif field == 'centro':
-            new_field = center_mode
-        elif field == 'denom':
-            new_field = places[center_mode] if center_mode in places else ""
-        else:
-            new_field = f'{line[field].replace('.','')} '
-        
-        required_data += f'{new_field} '
-    normalized_data = ' '.join(required_data.split())
-    print(normalized_data)
+from modules import prepare_data
 
-print(f'Usando imagen: {image_route}')
+data_prepared = prepare_data.format_data(data_matched)
+prepare_data.show_data(data_prepared, order_number, center_mode, places)
+
+#----------------------------------------------------------------
+#---------- VERIFY THE DATA (OPTIONAL) ----------
+#----------------------------------------------------------------
+
+img_id = image_route.rsplit("\\")[-1].removesuffix('.jpg')
+print(f'Usando imagen: {img_id}')
+
+from modules import ocr_verification
+final_ocr = {
+    'order_number': order_number,
+    'rows': data_matched
+}
+ocr_verification.evaluate_ocr(final_ocr, img_id)
