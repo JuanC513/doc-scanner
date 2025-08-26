@@ -5,8 +5,9 @@ from . import correct_ocrs
 # Receives an ocr input and compares it with the real data in ocrs, to check how accurate it was
 def evaluate_ocr(ocr_input, ocr_id):
     required = ['line', 'solped', 'material', 'quantity', 'subtotal', 'center']
-    REAL_OCR = correct_ocrs.ocrs[ocr_id]
-
+    REAL_OCR = correct_ocrs.ocrs.get(ocr_id, None)
+    if (not REAL_OCR):
+        return
 
     # Check order numbers
     if ocr_input['order_number'] != REAL_OCR['order_number']:
