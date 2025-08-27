@@ -36,13 +36,13 @@ def search_data_rows(text):
         raise LookupError(
             "❌ Header line was not found.\n"
         )
-    print(f"Header detected in line {start_index}:")
-    print(lines[start_index])
-    print("\nData rows detected:")
+    # print(f"Header detected in line {start_index}:")
+    # print(lines[start_index])
+    # print("\nData rows detected:")
     
     data_rows = lines[start_index+1:]
-    for row in data_rows:
-        print(row) if row.strip() != "" else None
+    # for row in data_rows:
+    #     print(row) if row.strip() != "" else None
     return data_rows
 
 
@@ -64,7 +64,7 @@ def clean_lines(lines):
 
         # 5. Replace multiple spaces for just one
         line = re.sub(r'\s+', ' ', line)
-        print(f'Linea limpiada: {line}')
+        # print(f'Linea limpiada: {line}')
         return line
     
     cleaned_lines = []
@@ -100,7 +100,7 @@ def match_data(lines):
         if match:
             return match.groupdict()
         else:
-            print("NOT MATCHED: ", line)
+            # print("NOT MATCHED: ", line)
             return None
 
     matched_lines = []
@@ -108,7 +108,8 @@ def match_data(lines):
         data = extract_data(line)
         if data:
             matched_lines.append(data)
-            print(data)
+            # print(data)
         else:
-            print("Could not be parsed:", line, "\n")
+            # print("Could not be parsed:", line, "\n")
+            pass
     return matched_lines
