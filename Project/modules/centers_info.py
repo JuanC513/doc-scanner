@@ -8,7 +8,9 @@ from collections import Counter
 
 # Get the mode for the center atribute in data
 def get_center_mode(data):
-    return Counter(line['center'] for line in data).most_common(1)[0][0]
+    if data:
+        return Counter(line['center'] for line in data).most_common(1)[0][0]
+    return None
 
 def get_places():
     # Load env variables from .env
