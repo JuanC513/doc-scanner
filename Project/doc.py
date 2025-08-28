@@ -78,27 +78,6 @@ def verify_data(data, order_number, img_id):
     ocr_verification.evaluate_ocr(final_ocr, img_id)
 
 #----------------------------------------------------------------
-#---------- SET UP THE IMAGE ----------
-#----------------------------------------------------------------
-
-import cv2
-from modules import set_up_images
-
-images = set_up_images.getImages()
-
-# Use the first image found
-image_route = images[0]
-# Use the image you want
-import os
-base_route = os.path.dirname(__file__)
-image_route = os.path.join(base_route, "imgs", "img006.jpg")
-img_id = image_route.rsplit("\\")[-1].removesuffix('.jpg')
-
-img = cv2.imread(image_route)
-if img is None:
-    raise ValueError("Image could not be loaded.")
-
-#----------------------------------------------------------------
 #---------- APPLY ALL IN A IMAGE ----------
 #----------------------------------------------------------------
 
@@ -125,4 +104,32 @@ def process_image_script(img, img_id):
     print(f'Usando Imagen: {img_id}')
     verify_data(data_prepared, order_number, img_id)
 
-process_image_script(img, img_id)
+#----------------------------------------------------------------
+#---------- SET UP THE IMAGE ----------
+#----------------------------------------------------------------
+
+import cv2
+import os
+from modules import set_up_images
+
+def run_multiple():
+    IMAGES_PROCESS = set_up_images.getImages()
+
+    # Put here the images to use
+    IMAGES_PROCESS = ['img004.jpg', 'img005.jpg', 'img006.jpg', 'img007.jpg', 'img008.jpg', 'img009.jpg', 'img010.jpg']
+
+    # Find the images and apply the process
+
+    base_route = os.path.dirname(__file__)
+    for image in IMAGES_PROCESS:
+        image_route = os.path.join(base_route, "imgs", image)
+        img_id = image_route.rsplit("\\")[-1].removesuffix('.jpg')
+
+        img = cv2.imread(image_route)
+        if img is None:
+            print(f'❌ Image: {img_id} could not be loaded.')
+            continue
+
+        process_image_script(img, img_id)
+
+run_multiple()
