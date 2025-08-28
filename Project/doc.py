@@ -75,7 +75,8 @@ def verify_data(data, order_number, img_id):
         'order_number': order_number,
         'rows': data
     }
-    ocr_verification.evaluate_ocr(final_ocr, img_id)
+    is_correct = ocr_verification.evaluate_ocr(final_ocr, img_id)
+    return is_correct
 
 #----------------------------------------------------------------
 #---------- APPLY ALL IN A IMAGE ----------
@@ -85,24 +86,24 @@ def process_image_script(img, img_id):
     text_detected = execute_ocr(img)
     data_searched = search_data(text_detected)
     order_number, data_rows = data_searched['order_number'], data_searched['data_rows']
-    print("\n"*1)
+    # print("\n"*1)
 
     data_cleaned = clean_data(data_rows)
     # for line in data_cleaned:
-        # print(f'Linea limpiada: {line}')
+    #     print(f'Linea limpiada: {line}')
 
     data_matched = extract_data(data_cleaned)
-    print("\n"*1)
 
     centers_info = get_centers_info(data_matched)
     center_mode, places = centers_info['center_mode'], centers_info[ 'places']
 
     data_prepared = prepare_the_data(data_matched)
-    prepare_data.show_data(data_prepared, order_number, center_mode, places)
+    # prepare_data.show_data(data_prepared, order_number, center_mode, places)
 
     # Optional
     print(f'Usando Imagen: {img_id}')
-    verify_data(data_prepared, order_number, img_id)
+    is_correct = verify_data(data_prepared, order_number, img_id)
+    return is_correct
 
 #----------------------------------------------------------------
 #---------- SET UP THE IMAGE ----------
@@ -116,9 +117,12 @@ def run_multiple():
     IMAGES_PROCESS = set_up_images.getImages()
 
     # Put here the images to use
-    IMAGES_PROCESS = ['img004.jpg', 'img005.jpg', 'img006.jpg', 'img007.jpg', 'img008.jpg', 'img009.jpg', 'img010.jpg']
+    # IMAGES_PROCESS = ['img004.jpg', 'img005.jpg', 'img006.jpg', 'img007.jpg', 'img008.jpg', 'img009.jpg', 'img010.jpg']
+    IMAGES_PROCESS = ['img009.jpg', 'img007.jpg']
+    is_testing = False
 
     # Find the images and apply the process
+    correct = []
 
     base_route = os.path.dirname(__file__)
     for image in IMAGES_PROCESS:
@@ -130,6 +134,16 @@ def run_multiple():
             print(f'❌ Image: {img_id} could not be loaded.')
             continue
 
-        process_image_script(img, img_id)
+        is_correct = process_image_script(img, img_id)
+
+        if is_correct:
+            correct.append('✅')
+        else:
+            correct.append('❌')
+    
+    if not is_testing:
+        return
+    for i, element in enumerate(IMAGES_PROCESS):
+        print(f' {element}: {correct[i]}')
 
 run_multiple()
